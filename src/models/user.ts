@@ -8,16 +8,22 @@ export type tokenObj = {
   token: string;
 };
 
+export type activeStatus = {
+  active: boolean;
+  activateLink: string;
+};
+
 export interface UserDocument extends Document {
   firstName: string;
-  middleName?: string;
   lastName: string;
   email: string;
   password: string;
   dob: Date;
   phoneNumber: number;
   tokens: tokenObj[];
+  activeStatus: activeStatus;
   generateAuthToken(): any;
+  generateVerificationToken(): any;
 }
 
 export interface UserModel extends Model<UserDocument> {
@@ -30,12 +36,6 @@ const userSchema: Schema = new Schema({
     required: true,
     trim: true,
     minLength: 3,
-    maxLength: 21,
-  },
-  middleName: {
-    type: String,
-    trim: true,
-    minLength: 1,
     maxLength: 21,
   },
   lastName: {
@@ -90,6 +90,16 @@ const userSchema: Schema = new Schema({
       },
     },
   ],
+  activeStatus: {
+    active: {
+      type: Boolean,
+      default: false,
+    },
+    activateLink: {
+      type: String,
+      default: "",
+    },
+  },
 });
 
 userSchema.statics.findByCredentials = async function (
@@ -111,6 +121,24 @@ userSchema.methods.generateAuthToken = async function () {
   );
 
   user.tokens = user.tokens.concat({ token });
+  await user.save();
+  return token;
+};
+
+userSchema.methods.generateVerificationToken = async function () {
+  const user: UserDocument = this as UserDocument;
+  const token: string = jwt.sign(
+    {
+      _id: user._id.toString(),
+      email: user.email,
+    },
+    process.env!.TOKEN_SECRET as string,
+    {
+      expiresIn: "7d",
+    }
+  );
+
+  user.activeStatus.activateLink = token;
   await user.save();
   return token;
 };

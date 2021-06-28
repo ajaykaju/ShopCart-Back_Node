@@ -1,4 +1,4 @@
-import express from "express";
+import express  from "express";
 import "./db/mongoose.js";
 import userRoute from "./routers/user.js";
 
@@ -6,6 +6,12 @@ const app = express();
 const port = process.env.PORT;
 
 app.use(express.json());
+
+app.use(function(req: express.Request, res: express.Response, next: express.NextFunction)  {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next()
+});
 
 app.use(userRoute);
 

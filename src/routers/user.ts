@@ -1,6 +1,8 @@
 import { Router, Request, Response } from "express";
 
 import auth from "../auth/auth.js";
+import verify from "../auth/verification.js";
+import { sendVerificationMail, sendWelcomMail } from "../emails/sendgrid.js";
 import User, { UserDocument, tokenObj } from "../models/user.js";
 
 const router: Router = Router();
@@ -9,8 +11,21 @@ router.post("/user", async (req, res) => {
   const user: UserDocument = new User(req.body);
   try {
     await user.save();
-    const token: string = await user.generateAuthToken();
-    res.status(201).send({ user, token });
+    const token = await user.generateVerificationToken();
+    await sendVerificationMail(
+      user.email,
+      token,
+      `${user.firstName}  ${user.lastName}`,
+      async (error, data) => {
+        if (error) {
+          await User.deleteOne({ email: user.email });
+          res.status(400).send();
+        }
+        if (data) {
+          res.status(201).send({ user });
+        }
+      }
+    );
   } catch (error) {
     res.status(400).send(error);
   }
@@ -52,6 +67,31 @@ router.post("/user/logoutAll", auth, async (req: Request, res: Response) => {
     res.send();
   } catch (e) {
     res.status(500).send();
+  }
+});
+
+router.post("/user/isNewUser", async (req: Request, res: Response) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) res.send();
+    else res.status(406).send("Email already in use!");
+  } catch (e) {
+    res.status(500).send(e);
+  }
+});
+
+//account verification endpoint
+
+router.get("/verify", verify, async (req: Request, res: Response) => {
+  try {
+    const user: UserDocument = req.user;
+    user.activeStatus.active = true;
+    user.activeStatus.activateLink = "";
+    await user.save();
+    await sendWelcomMail(user.email, `${user.firstName}  ${user.lastName}`);
+    res.redirect(`${process.env.FRONT_END_URL}/signup`); // local server
+  } catch (e) {
+    res.send(500).send();
   }
 });
 

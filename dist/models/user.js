@@ -43,12 +43,6 @@ const userSchema = new mongoose_1.Schema({
         minLength: 3,
         maxLength: 21,
     },
-    middleName: {
-        type: String,
-        trim: true,
-        minLength: 1,
-        maxLength: 21,
-    },
     lastName: {
         type: String,
         required: true,
@@ -101,6 +95,16 @@ const userSchema = new mongoose_1.Schema({
             },
         },
     ],
+    activeStatus: {
+        active: {
+            type: Boolean,
+            default: false,
+        },
+        activateLink: {
+            type: String,
+            default: "",
+        },
+    },
 });
 userSchema.statics.findByCredentials = function (email, password) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -118,6 +122,20 @@ userSchema.methods.generateAuthToken = function () {
         const user = this;
         const token = jsonwebtoken_1.default.sign({ _id: user._id.toString() }, process.env.TOKEN_SECRET);
         user.tokens = user.tokens.concat({ token });
+        yield user.save();
+        return token;
+    });
+};
+userSchema.methods.generateVerificationToken = function () {
+    return __awaiter(this, void 0, void 0, function* () {
+        const user = this;
+        const token = jsonwebtoken_1.default.sign({
+            _id: user._id.toString(),
+            email: user.email,
+        }, process.env.TOKEN_SECRET, {
+            expiresIn: "7d",
+        });
+        user.activeStatus.activateLink = token;
         yield user.save();
         return token;
     });
