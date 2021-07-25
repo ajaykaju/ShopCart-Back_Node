@@ -21,9 +21,11 @@
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.12.13",
+    "url-parse": "^1.5.1",
     "validator": "^13.6.0"
   },
   "devDependencies": {
+    "@types/url-parse": "^1.4.3",
     "env-cmd": "^10.1.0",
     "nodemon": "^2.0.7"
   }

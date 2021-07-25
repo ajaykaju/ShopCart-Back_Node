@@ -40,7 +40,7 @@ export const sendWelcomMail = async (to: string, name: string) => {
     text: "ShopCart Welcome Mail",
     html: welcomeTemplateGenerator(
       name,
-      `${process.env.FRONT_END_URL}/signup`
+      `${process.env.FRONT_END_URL}/login`
     ),
   };
 

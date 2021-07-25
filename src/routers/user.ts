@@ -40,7 +40,7 @@ router.post("/user/login", async (req, res) => {
     const token: string = await user.generateAuthToken();
     res.status(200).send({ user, token });
   } catch (error) {
-    res.status(404).send(error.message);
+    res.status(404).send();
   }
 });
 
@@ -89,7 +89,7 @@ router.get("/verify", verify, async (req: Request, res: Response) => {
     user.activeStatus.activateLink = "";
     await user.save();
     await sendWelcomMail(user.email, `${user.firstName}  ${user.lastName}`);
-    res.redirect(`${process.env.FRONT_END_URL}/signup`); // local server
+    res.redirect(`${process.env.FRONT_END_URL}/login`); // local server
   } catch (e) {
     res.send(500).send();
   }

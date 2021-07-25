@@ -42,7 +42,7 @@ const sendWelcomMail = (to, name) => __awaiter(void 0, void 0, void 0, function*
         from: "ajukodinhi@gmail.com",
         subject: "ShopCart Welcome",
         text: "ShopCart Welcome Mail",
-        html: templateWelcome_1.default(name, `${process.env.FRONT_END_URL}/signup`),
+        html: templateWelcome_1.default(name, `${process.env.FRONT_END_URL}/login`),
     };
     yield mail_1.default.send(msg);
 });

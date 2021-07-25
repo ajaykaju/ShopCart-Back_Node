@@ -44,7 +44,7 @@ router.post("/user/login", (req, res) => __awaiter(void 0, void 0, void 0, funct
         res.status(200).send({ user, token });
     }
     catch (error) {
-        res.status(404).send(error.message);
+        res.status(404).send();
     }
 }));
 router.get("/user/me", auth_js_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -90,7 +90,7 @@ router.get("/verify", verification_js_1.default, (req, res) => __awaiter(void 0,
         user.activeStatus.activateLink = "";
         yield user.save();
         yield sendgrid_js_1.sendWelcomMail(user.email, `${user.firstName}  ${user.lastName}`);
-        res.redirect(`${process.env.FRONT_END_URL}/signup`); // local server
+        res.redirect(`${process.env.FRONT_END_URL}/login`); // local server
     }
     catch (e) {
         res.send(500).send();
